@@ -1,0 +1,7 @@
+#!/usr/bin/env nu
+
+try {
+  wl-paste --type image | swappy -f -
+} catch {
+  notify-send "last copied item is not an image"
+}

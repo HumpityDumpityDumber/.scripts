@@ -1,0 +1,18 @@
+#!/usr/bin/env nu
+
+let hex_color = niri msg --json pick-color |
+from json |
+get rgb |
+each { |float_ch|
+  $float_ch * 255 |
+  math round |
+  into int
+  } |
+  each { |int_ch|
+    $int_ch |
+    into binary -c |
+    encode hex } |
+  $"#($in.0)($in.1)($in.2)"
+
+wl-copy $hex_color
+notify-send $hex_color

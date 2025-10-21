@@ -1,0 +1,5 @@
+#!/usr/bin/env nu
+
+let output = niri msg --json focused-output | from json | get name
+
+woomer --monitor $output

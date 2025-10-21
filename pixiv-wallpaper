@@ -1,0 +1,50 @@
+#!/usr/bin/env nu
+use libpw
+
+libpw init
+
+const file_dir = (path self | path dirname)
+
+let keys = (open ($file_dir)/pw-keys.json)
+
+let access_token = libpw get-access-token $keys.refresh_token
+
+def printGreen [text] {
+    print $"(ansi green_bold)($text)(ansi reset)"
+}
+
+# fetch bookmarked images tagged with #wallpaper from pixiv using libpw
+def main [
+    --update-bookmarks (-u) # update the bookmarks cache
+    --no-apply (-n) # don't apply wallpaper after updating bookmarks
+    --verbose (-v)
+] {
+    if $update_bookmarks {
+        libpw update-bookmarks $keys.user_id $access_token
+        if $verbose {
+            printGreen "bookmarks updated !"
+        }
+    }
+
+    if $no_apply {
+        if $verbose {
+            printGreen "exiting early..."
+        }
+        exit
+    }
+
+    let url = libpw pick-wallpaper
+    if $verbose {
+        printGreen "wallpaper selected"
+    }
+
+    let wallpaper = libpw get-wallpaper $url $access_token
+    if $verbose {
+        $wallpaper | if ($in | get fetched) { printGreen "wallpaper was fetched !" } else { printGreen "wallpaper was in cache !" }
+    }
+
+    $wallpaper | get path | do { matugen image $in; swww img --transition-type wave $in }
+    if $verbose {
+        printGreen "wallpaper applied !"
+    }
+}

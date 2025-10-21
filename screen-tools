@@ -1,0 +1,27 @@
+#!/usr/bin/env nu
+
+def main [] {
+    help main
+}
+
+def "main ocr" [
+    lang?: string,   # language code
+    --list(-l)       # show supported languages
+] {
+    let ocr_langs = (tesseract --list-langs | lines | skip 1 | each {|l| $l | str trim })
+
+    if $list {
+        print $ocr_langs
+    } else {
+        let language = if ($lang == null) { "eng" } else { $lang }
+        if ($language in $ocr_langs) {
+            grim -g (slurp) - | tesseract -l $language - - | wl-copy
+        } else {
+            print -e $"Invalid language code '($language)'. Use `ocr --list` to see supported languages."
+        }
+    }
+}
+
+def "main qr" [] {
+    grim -g (slurp) - | zbarimg - | str replace -r "^[^:]*:" "" | wl-copy
+}

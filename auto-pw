@@ -1,0 +1,5 @@
+#!/usr/bin/env nu
+
+pixiv-wallpaper -nu
+
+loop { pixiv-wallpaper; sleep 30min }

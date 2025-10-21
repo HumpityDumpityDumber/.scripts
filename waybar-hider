@@ -1,0 +1,12 @@
+#!/usr/bin/env nu
+
+niri msg --json event-stream | lines | each {|line|
+    if ($line | str trim) != "" {
+        let parsed = ($line | from json)
+        let overview = $parsed | get OverviewOpenedOrClosed?
+        if ($overview | is-not-empty) {
+            pkill -SIGUSR1 waybar
+        }
+    }
+} | ignore
+

@@ -1,0 +1,42 @@
+#!/usr/bin/env nu
+
+let elgato_source = "alsa_input.usb-Elgato_Elgato_HD60_X_A00XB422206D8Q-02.analog-stereo"
+
+def notify [msg: string] {
+    notify-send "Elgato Audio" $msg --app-name="Knee's Capture Card Audio Script"
+}
+
+# check if loopback already loaded
+if (pactl --format=json list modules | from json | any { $in.argument | default "" |str contains $elgato_source }) {
+    print "Loopback module for Elgato source already loaded. Exiting."
+    notify "Loopback module already loaded, nothing to do."
+    exit 0
+}
+
+print "Loading loopback module for Elgato..."
+pactl load-module module-loopback source=($elgato_source)
+
+# get the source id
+let source_id = (pactl --format=json list sources | from json | where name == $elgato_source | get index? | get 0?)
+
+if $source_id == null {
+    print "Elgato source not found."
+    notify "Elgato source not found. Exiting."
+    exit 1
+}
+
+# find source outputs linked to this source and set volume
+pactl --format=json list source-outputs
+| from json
+| where source == $source_id
+| get index
+| each { |so_id|
+    print $"Setting volume of source output #($so_id) to 60%"
+    ^pactl set-source-output-volume $so_id 60%
+}
+
+# trigger ffplay briefly to activate the loopback
+^timeout 1 ffplay -autoexit -f video4linux2 /dev/video0 out+err> /dev/null
+
+notify "Loopback module loaded and volumes adjusted."
+

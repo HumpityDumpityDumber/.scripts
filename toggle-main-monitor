@@ -1,0 +1,26 @@
+#!/usr/bin/env nu
+
+def notify [message: string] {
+  notify-send "Monitor Toggle" $message
+}
+
+# Get current_mode for DP-1
+let current_mode = (niri msg --json outputs | from json | get DP-1.current_mode)
+
+match $current_mode {
+  null => {
+    print "Turning on DP-1 monitor..."
+    niri msg action close-overview
+    niri msg output DP-1 on
+    ddcutil --bus=6 setvcp 0x60 0x09
+    swww query | lines | parse ": {display}: {res}, scale: {scale}, currently displaying: image: {path}" | where display == HDMI-A-1 | get path.0 | swww img --transition-type none $in
+    xrandr --output DP-1 --primary
+    }
+  _ => {
+    print "Turning off DP-1 monitor..."
+    niri msg output DP-1 off
+    ddcutil --bus=6 setvcp 0x60 0x06
+    sleep 3sec
+    notify "DP-1 monitor disabled"
+  }
+}

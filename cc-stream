@@ -1,0 +1,3 @@
+#!/usr/bin/env nu
+
+bgrun mpv /dev/video0 --fs --osc=no --wayland-app-id="cc-stream" --wayland-content-type=game --profile=low-latency

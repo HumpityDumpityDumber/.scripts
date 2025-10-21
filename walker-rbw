@@ -1,0 +1,17 @@
+#!/usr/bin/env nu
+
+rbw unlock
+
+let login = rbw list | walker -d | rbw get $in --raw | from json | get data
+
+let selected = (
+  ["username", "password"] |
+  to text |
+  walker -d |
+  match $in {
+    "username" => $login.username
+    "password" => $login.password
+  }
+)
+
+$selected | wl-copy
