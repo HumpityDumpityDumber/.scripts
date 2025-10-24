@@ -8,11 +8,6 @@ This set of scripts has layers of abstraction over libpw.
 
 **libpw** is a nushell module imported with `use libpw`. This module has functions for fetching a pixiv access key, fetching bookmarks with the #wallpaper tag on pixiv, and randomly selecting one of those wallpapers. **pixiv-wallpaper** is a shell script that uses libpw to pick and set a wallpaper (using swww) from pixiv. Finally, **auto-pw** is a shell script which loops every 30 minutes to run pixiv-wallpaper.
 
-TODO:
-- add functionality for adding local wallpapers to the list
-- add a id blacklist (mostly for multipage works where one should be ignored)
-- maybe? switch from random every time to a cached queue
-
 ## protoner
 
 `create` a proton prefix with a protonge version, `install` a game with a prefix, `run` a game with a prefix, and `add` a game to lutris.
