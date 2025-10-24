@@ -2,6 +2,18 @@ const mod_dir = (path self | path dirname)
 
 export-env { $env.PW_CACHEDIR = ($mod_dir)/.pw-cache }
 
+def getBookmarkUrls [] {
+    open ($env.PW_CACHEDIR)/bookmarks-list.json |
+    get illusts |
+        each { |page|
+        if ($page.page_count | into int) > 1 {
+            get meta_pages.image_urls.original | flatten
+        } else {
+            get meta_single_page.original_image_url
+        }
+    } | flatten
+}
+
 export def "main" [] {
     (
         print 
@@ -48,12 +60,11 @@ export def "update-bookmarks" [user_id: int, access_token: string] {
         Authorization: $"Bearer ($access_token)"
     } ) | save -f $bookmarks_file
 
-    let bookmarks = ( open $bookmarks_file |
-    get illusts |
-    get meta_single_page.original_image_url |
-    each { url parse |
-    get path |
-    path basename }
+    let bookmarks = ( 
+        getBookmarkUrls |
+        each { url parse |
+        get path |
+        path basename }
     )
 
     let images = (
@@ -74,16 +85,9 @@ export def "update-bookmarks" [user_id: int, access_token: string] {
 
 # pick url from cached bookmarks list
 export def "pick-wallpaper" [] {
-    let bookmarks = (open ($env.PW_CACHEDIR)/bookmarks-list.json)
-
-    (
-    $bookmarks.illusts |
-    each { 
-        get meta_single_page.original_image_url 
-    } |
+    getBookmarkUrls |
     shuffle |
     first
-    )
 }
 
 # fetch pixiv wallpaper at specified url
