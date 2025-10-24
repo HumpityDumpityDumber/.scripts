@@ -1,5 +1,7 @@
 #!/usr/bin/env nu
 
+pkill -SIGUSR2 waybar
+
 niri msg --json event-stream | lines | each {|line|
     if ($line | str trim) != "" {
         let parsed = ($line | from json)
@@ -9,4 +11,3 @@ niri msg --json event-stream | lines | each {|line|
         }
     }
 } | ignore
-
