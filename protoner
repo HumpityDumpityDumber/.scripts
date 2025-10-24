@@ -1,25 +1,32 @@
 #!/usr/bin/env nu
 
-# create a prefix in the specified path relative to home
-def main [prefix_path, protonge_ver] {
+# tools to interact with proton. all paths should be relative to home.
+def main [] {
+    help main
+}
+
+# create a proton prefix
+def "main create" [prefix_path, protonge_ver] {
     with-env { STEAM_COMPAT_DATA_PATH: $"($env.Home)/($prefix_path)", STEAM_COMPAT_CLIENT_INSTALL_PATH: $"($env.HOME)/.steam/root" } {
         ~/.steam/root/compatibilitytools.d/GE-Proton($protonge_ver)/proton run wineboot
     }
 }
 
-# run an msi installer (all paths relative to home)
-def "main installer" [prefix_path, protonge_ver, installer_path] {
+# run an msi installer
+def "main install" [prefix_path, protonge_ver, installer_path] {
     with-env { STEAM_COMPAT_DATA_PATH: $"($env.Home)/($prefix_path)", STEAM_COMPAT_CLIENT_INSTALL_PATH: $"($env.HOME)/.steam/root" } {
         bgrun ~/.steam/root/compatibilitytools.d/GE-Proton($protonge_ver)/proton run msiexec /i ~/($installer_path)
     }
  }
 
+# run a game with a prefix
 def "main run" [prefix_path, protonge_ver, exe_path] {
     with-env { STEAM_COMPAT_DATA_PATH: $"($env.Home)/($prefix_path)", STEAM_COMPAT_CLIENT_INSTALL_PATH: $"($env.HOME)/.steam/root" } {
         bgrun ~/.steam/root/compatibilitytools.d/GE-Proton($protonge_ver)/proton run ~/($exe_path)
     }
 }
 
+# add a game to lutris
 def "main add" [prefix_path, protonge_ver, exe_path, game_name, game_slug] {
     let add_file = {name: $"($game_name)", version: "2022", game_slug: $"($game_slug)", slug: $"($game_name)_installer", runner: wine, script: {game: {exe: $"($exe_path)", prefix: $"($prefix_path)", working_dir: ($exe_path | path dirname) arch: "win64"}, wine: {version: $"GE-Proton($protonge_ver)"}}}
     mkdir ~/.cache/protoner
