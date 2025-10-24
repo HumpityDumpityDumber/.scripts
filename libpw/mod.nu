@@ -52,7 +52,7 @@ export def "init" [] {
 export def "get-access-token" [refresh_token: string] {
     let token_file = ($env.PW_CACHEDIR)/access_token.json
 
-    if (try { ([(date now | into int), -3600000000000] | math sum ) > (open $token_file | get time) } catch { true }) {
+    if (try { (date now | into int) - (open $token_file | get time) > 3600000000000 } catch { true }) {
         let token_file = ($env.PW_CACHEDIR)/access_token.json
         let token = (http post "https://oauth.secure.pixiv.net/auth/token" $"grant_type=refresh_token&refresh_token=($refresh_token)&client_id=MOBrBDS8blbauoSck0ZfDbtuzpyT&client_secret=lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj" --headers { "Content-Type": "application/x-www-form-urlencoded" })
         {
@@ -99,14 +99,13 @@ export def "update-bookmarks" [user_id: int, access_token: string] {
     )
     
     # clear images no longer in bookmarks from cache
-    ( $bookmarks |
-    append $images |
-    uniq -d |
-    append $images |
-    uniq -u |
-    each { |file|
-        rm ($env.PW_CACHEDIR)/images/($file)
-    } )
+    $images | where { |i|
+        not ($bookmarks |
+        any { |b| $b == $i}) 
+    } |
+    each { |i|
+        rm ($env.PW_CACHEDIR)/images/($i)
+    }
 }
 
 # pick url from cached bookmarks list
