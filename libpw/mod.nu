@@ -29,6 +29,7 @@ export def "main" [] {
     )
 }
 
+# create cache folder
 export def "init" [] {
     if not (($env.PW_CACHEDIR)/images | path exists) {
         mkdir -v ($env.PW_CACHEDIR)/images
@@ -67,7 +68,7 @@ export def "update-bookmarks" [user_id: int, access_token: string] {
 
     loop {
         $response = requestBookmarks $response.next_url
-        $toSave = ($toSave | append $response.illusts | where not ($it.id in ($env.PW_BLACKLIST_IDS? | default [])))
+        $toSave ++= $response.illusts | where not ($it.id in ($env.PW_BLACKLIST_IDS? | default []))
         if $response.next_url == null { break }
     }
 
