@@ -7,7 +7,7 @@ const file_dir = (path self | path dirname)
 
 $env.PW_INCLUDE_URLS = if (($file_dir)/pw_include_urls.txt | path exists) { (open ($file_dir)/pw_include_urls.txt | lines) } else { null }
 
-$env.PW_BLACKLIST_IDS = if (($file_dir)/pw_blacklist.txt | path exists) { (open ($file_dir)/pw_blacklist.txt | lines) } else { null }
+$env.PW_BLACKLIST_IDS = if (($file_dir)/pw_blacklist.txt | path exists) { (open ($file_dir)/pw_blacklist.txt | lines | into int) } else { null }
 
 let keys = (open ($file_dir)/pw-keys.json)
 
