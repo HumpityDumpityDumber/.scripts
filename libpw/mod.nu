@@ -4,8 +4,7 @@ export-env { $env.PW_CACHEDIR = ($mod_dir)/.pw-cache }
 
 def getBookmarkUrls [] {
     open ($env.PW_CACHEDIR)/bookmarks-list.json |
-    get illusts |
-        each { |page|
+    each { |page|
         if ($page.page_count | into int) > 1 {
             get meta_pages.image_urls.original | flatten
         } else {
@@ -55,10 +54,23 @@ export def "get-access-token" [refresh_token: string] {
 export def "update-bookmarks" [user_id: int, access_token: string] {
     let $bookmarks_file = ($env.PW_CACHEDIR)/bookmarks-list.json
 
-    ( http get $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id=($user_id)&restrict=public&filter=for_ios&tag=wallpaper"
-    --headers {
-        Authorization: $"Bearer ($access_token)"
-    } ) | save -f $bookmarks_file
+    def requestBookmarks [url: string] {
+        http get $url --headers { Authorization: $"Bearer ($access_token)" }
+    }
+
+    mut response = (
+        requestBookmarks $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id=($user_id)&restrict=public&filter=for_ios&tag=wallpaper"
+    )
+
+    mut toSave = $response.illusts
+
+    loop {
+        $response = requestBookmarks $response.next_url
+        $toSave = $toSave | append $response.illusts
+        if $response.next_url == null { break }
+    }
+
+    $toSave | save -f $bookmarks_file
 
     let bookmarks = ( 
         getBookmarkUrls |
