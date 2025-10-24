@@ -1,2 +1,4 @@
 pw-keys.json
 .pw-cache
+pw_include_urls.txt
+pw_blacklist.txt

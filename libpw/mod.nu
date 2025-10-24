@@ -10,12 +10,13 @@ def getBookmarkUrls [] {
         } else {
             get meta_single_page.original_image_url
         }
-    } | flatten
+    } | flatten |
+    append ($env.PW_INCLUDE_URLS?)
 }
 
 export def "main" [] {
     (
-        print 
+        print
         "use this as a library"
         "subcommands are:"
         ([
@@ -58,15 +59,15 @@ export def "update-bookmarks" [user_id: int, access_token: string] {
         http get $url --headers { Authorization: $"Bearer ($access_token)" }
     }
 
-    mut response = (
-        requestBookmarks $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id=($user_id)&restrict=public&filter=for_ios&tag=wallpaper"
-    )
+    mut response = {
+        next_url: $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id=($user_id)&restrict=public&filter=for_ios&tag=wallpaper"
+    }
 
-    mut toSave = $response.illusts
+    mut toSave = []
 
     loop {
         $response = requestBookmarks $response.next_url
-        $toSave = $toSave | append $response.illusts
+        $toSave = ($toSave | append $response.illusts | where not ($it.id in ($env.PW_BLACKLIST_IDS? | default [])))
         if $response.next_url == null { break }
     }
 
@@ -104,19 +105,26 @@ export def "pick-wallpaper" [] {
 
 # fetch pixiv wallpaper at specified url
 export def "get-wallpaper" [wallpaper_url: string, access_token: string] {
-    let bookmarks_file = ($env.PW_CACHEDIR)/bookmarks-list.json
+    mut file = ""
 
-    # update list if arg was passed
+    if ($wallpaper_url | url parse).scheme == file {
+        $file = ($wallpaper_url | url parse).path
+    } else {
+        $file = ($env.PW_CACHEDIR)/images/($wallpaper_url | url parse | get path | path basename)
+    }
     
-    let file = ($env.PW_CACHEDIR)/images/($wallpaper_url | url parse | get path | path basename)
     mut fetched = false
 
     # fetch image if it hasn't already been downloaded
     if not ($file | path exists) {
-        http get $wallpaper_url --headers {
-            Authorization: $"Bearer ($access_token)"
-            Referer: "https://app-api.pixiv.net/"
-        } --raw | save $file
+        if ($wallpaper_url | url parse).host == i.pximg.net {
+            http get $wallpaper_url --headers {
+                Authorization: $"Bearer ($access_token)"
+                Referer: "https://app-api.pixiv.net/"
+            } --raw | save $file
+        } else {
+            http get $wallpaper_url --raw | save $file
+        }
 
         $fetched = true
     }
