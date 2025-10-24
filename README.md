@@ -27,7 +27,7 @@ run apps detached from shell (for use with nushell because there is no disown).
 
 ## ss-edit
 
-edit the last screenshot captured with niris screenshot tool.
+edit an image copied to the clipboard. (mostly for editing latest screenshot)
 
 ## monkeytype-url
 
