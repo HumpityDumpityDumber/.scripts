@@ -15,7 +15,7 @@ Before running any other commands you should run the `init` subcommand. Running 
 
 ## Usage
 
-```
+```nushell
 libpw get-access-token <refresh_token>
 
 libpw update-bookmarks <user_id> <access_token>
@@ -41,7 +41,7 @@ There are two environmental variables that affect what images are included in th
 `$env.PW_INCLUDE_URLS` specifies URLs that should be appended to the list. These can be other image links or even `file://` links to images on your filesystem. These additional images will be cached and pruned just like Pixiv ones (except for `file://` ones because those are already stored locally)
 
 Example script:
-```
+```nushell
 #!/usr/bin/env nu
 
 const file_dir = (path self | path dirname)
