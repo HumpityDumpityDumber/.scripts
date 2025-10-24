@@ -50,57 +50,17 @@ use libpw
 
 libpw init
 
-$env.PW_INCLUDE_URLS = if (($file_dir)/pw_include_urls.txt | path exists) { (open ($file_dir)/pw_include_urls.txt | lines) } else { null }
-
-$env.PW_BLACKLIST_IMAGES = if (($file_dir)/pw_blacklist.txt | path exists) { (open ($file_dir)/pw_blacklist.txt | lines | into int) } else { null }
-
 let keys = (open ($file_dir)/pw-keys.json)
 
 let access_token = libpw get-access-token $keys.refresh_token
 
-def printGreen [text] {
-    print -e $"(ansi green_bold)($text)(ansi reset)"
-}
-
-# fetch bookmarked images tagged with #wallpaper from pixiv using libpw
-def main [
-    --update-bookmarks (-u) # update the bookmarks cache
-    --no-apply (-n) # don't apply wallpaper after updating bookmarks
-    --verbose (-v) # print verbose output
-    --print (-p) # print url instead of applying wallpaper
-] {
-    if $update_bookmarks {
-        libpw update-bookmarks $keys.user_id $access_token
-        if $verbose {
-            printGreen "bookmarks updated !"
-        }
-    }
-
-    if $no_apply {
-        if $verbose {
-            printGreen "exiting early..."
-        }
-        exit
-    }
+def main [] {
+    libpw update-bookmarks $keys.user_id $access_token
 
     let url = libpw pick-wallpaper
-    if $verbose {
-        printGreen $"wallpaper selected: ($url)"
-    }
 
     let wallpaper = libpw get-wallpaper $url $access_token
-    if $verbose {
-        $wallpaper | if ($in | get fetched) { printGreen "wallpaper was fetched !" } else { printGreen "wallpaper was in cache !" }
-    }
 
-    if $print {
-        print $wallpaper.path
-        exit
-    }
-
-    $wallpaper | get path | do { matugen image $in; swww img --transition-type wave $in }
-    if $verbose {
-        printGreen "wallpaper applied !"
-    }
+    print $wallpaper.path
 }
 ```
