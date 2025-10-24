@@ -11,7 +11,18 @@ def getBookmarkUrls [] {
             get meta_single_page.original_image_url
         }
     } | flatten |
-    append ($env.PW_INCLUDE_URLS?)
+    append ($env.PW_INCLUDE_URLS?) |
+    where not (
+        (
+        $it |
+        url parse |
+        get path |
+        path basename
+        ) in (
+        $env.PW_BLACKLIST_IMAGES? |
+        default []
+        )
+    )
 }
 
 export def "main" [] {
@@ -69,7 +80,7 @@ export def "update-bookmarks" [user_id: int, access_token: string] {
 
     loop {
         $response = requestBookmarks $response.next_url
-        $toSave ++= $response.illusts | where not ($it.id in ($env.PW_BLACKLIST_IMAGES? | default []))
+        $toSave ++= $response.illusts
         if $response.next_url == null { break }
     }
 
