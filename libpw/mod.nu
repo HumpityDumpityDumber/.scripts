@@ -17,7 +17,7 @@ def getBookmarkUrls [] {
 export def "main" [] {
     (
         print
-        "use this as a library"
+        "libpw should be used in a script."
         "subcommands are:"
         ([
             init
@@ -26,6 +26,7 @@ export def "main" [] {
             pick-wallpaper
             get-wallpaper
         ] | grid)
+        "run libpw <subcommand> --help for more information on how to use each subcommand"
     )
 }
 
