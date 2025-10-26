@@ -1,8 +1,11 @@
 # Knee's Nushell Scripts
 
+
 These are the nushell scripts that I use on a daily basis. Nushell is a very useful tool for developing quick workflow enhancers.
 
 ## libpw, pixiv-wallpaper, and auto-pw
+
+
 
 This set of scripts has layers of abstraction over libpw.
 
@@ -14,9 +17,11 @@ This set of scripts has layers of abstraction over libpw.
 
 ## walker-rbw
 
+
 log into the rbw bitwarden client and pick a login to copy in walker.
 
 ## bgrun
+
 
 run apps detached from shell (for use with nushell because there is no disown).
 
@@ -46,7 +51,7 @@ makes woomer open on the correct screen in niri.
 
 ## cc-stream
 
-open my capture card with low latency and now ui in mpv.
+open my capture card with low latency and no ui in mpv.
 
 ## cc-audio
 
@@ -58,3 +63,7 @@ TODO:
 ## waybar-hider
 
 only show waybar when the niri overview is open.
+
+
+
+
