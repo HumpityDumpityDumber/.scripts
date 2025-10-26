@@ -1,6 +1,9 @@
 # libpw
 
+
 A Nushell module/library for fetching images tagged `#wallpaper` from a users bookmarks on Pixiv.
+
+For an example script go to [pixiv-wallpaper](../pixiv-wallpaper) which will work out of the box with [swww](https://github.com/LGFae/swww) and [matugen](https://github.com/InioX/matugen) or just printing the image path to stdout with the `--print` flag
 
 ## Getting started
 To get started using libpw you will need your Pixiv user id and refresh token. 
@@ -9,20 +12,28 @@ Getting your user id is easy; just go to your profile page and look at the URL: 
 
 Next we have to get your refresh token which is slightly more annoying. I recommend using [gppt](https://github.com/eggplants/get-Pixivpy-token) which will spit out a refresh token and an access token. We only need the refresh token because libpw grabs access tokens when needed.
 
+
+
 We need the refresh token in order to run the `get-access-token` subcommand and the user id to run the `update-bookmarks` subcommand.
 
 Before running any other commands you should run the `init` subcommand. Running `init` before any other commands is recommended in your scripts. `init` will by default create a cache directory named `.pw-cache/` in the module folder. This can be changed by reassigning `$env.PW_CACHEDIR` after importing the module.
+
+
 
 ## Usage
 
 ```nushell
 libpw get-access-token <refresh_token>
 
+
 libpw update-bookmarks <user_id> <access_token>
+
 
 libpw pick-wallpaper
 
+
 libpw get-wallpaper <wallpaper_url> <access_token>
+
 ```
 
 `get-access-token` is run with your refresh token and returns your access token. Your access token is fetched from Pixiv only if the one in the cache has expired or does not exist.
@@ -40,19 +51,26 @@ There are two environmental variables that affect what images are included in th
 
 `$env.PW_INCLUDE_URLS` specifies URLs that should be appended to the list. These can be other image links or even `file://` links to images on your filesystem. These additional images will be cached and pruned just like Pixiv ones (except for `file://` ones because those are already stored locally)
 
+
 Example script:
 ```nushell
 #!/usr/bin/env nu
 
+
 const file_dir = (path self | path dirname)
+
 
 use libpw
 
+
 libpw init
+
 
 let keys = (open ($file_dir)/pw-keys.json)
 
+
 let access_token = libpw get-access-token $keys.refresh_token
+
 
 def main [] {
     libpw update-bookmarks $keys.user_id $access_token
@@ -64,3 +82,20 @@ def main [] {
     print $wallpaper.path
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
