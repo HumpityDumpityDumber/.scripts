@@ -1,5 +1,7 @@
 #!/usr/bin/env nu
 
+job spawn { swww-daemon }
+
 pixiv-wallpaper -nu
 
 loop { pixiv-wallpaper; sleep 30min }
