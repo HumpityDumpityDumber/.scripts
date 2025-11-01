@@ -5,8 +5,7 @@ from json |
 get rgb |
 each { |float_ch|
   $float_ch * 255 |
-  math round |
-  into int
+  math round
   } |
   each { |int_ch|
     $int_ch |
@@ -15,4 +14,4 @@ each { |float_ch|
   $"#($in.0)($in.1)($in.2)"
 
 wl-copy $hex_color
-notify-send $hex_color
+notify-send --transient --app-name=niri-picker $hex_color
