@@ -4,13 +4,15 @@ const file_dir = (path self | path dirname)
 
 use libpw
 
+$env.PW_CACHEDIR = ($env.home)/.cache/pixiv-wallpaper
+
 libpw init
 
 $env.PW_INCLUDE_URLS = if (($file_dir)/pw_include_urls.txt | path exists) { (open ($file_dir)/pw_include_urls.txt | lines) } else { null }
 
 $env.PW_BLACKLIST_IMAGES = if (($file_dir)/pw_blacklist.txt | path exists) { (open ($file_dir)/pw_blacklist.txt | lines) } else { null }
 
-let keys = (open ($file_dir)/pw-keys.json)
+let keys = (open ($env.home)/.config/pixiv-wallpaper/pw-keys.json)
 
 let access_token = libpw get-access-token $keys.refresh_token
 
