@@ -2,6 +2,16 @@
 
 job spawn { swww-daemon }
 
+print "Waiting for network connection..."
+
+loop {
+    if (do { ^ping -c 1 -W 2 8.8.8.8 } | complete).exit_code == 0 {
+        break
+    }
+}
+
+print "Network is online!"
+
 pixiv-wallpaper -nu
 
 loop { pixiv-wallpaper; sleep 30min }
