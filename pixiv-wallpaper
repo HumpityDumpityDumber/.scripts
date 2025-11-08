@@ -12,10 +12,6 @@ $env.PW_INCLUDE_URLS = if (($file_dir)/pw_include_urls.txt | path exists) { (ope
 
 $env.PW_BLACKLIST_IMAGES = if (($file_dir)/pw_blacklist.txt | path exists) { (open ($file_dir)/pw_blacklist.txt | lines) } else { null }
 
-let keys = (open ($env.home)/.config/pixiv-wallpaper/pw-keys.json)
-
-let access_token = libpw get-access-token $keys.refresh_token
-
 def printGreen [text] {
     print -e $"(ansi green_bold)($text)(ansi reset)"
 }
@@ -26,7 +22,11 @@ def main [
     --no-apply (-n) # don't apply wallpaper after updating bookmarks
     --verbose (-v) # print verbose output
     --print (-p) # print url instead of applying wallpaper
+    --show (-s) # print chosen image to terminal with viu
 ] {
+    let keys = (open ($env.home)/.config/pixiv-wallpaper/pw-keys.json)
+    let access_token = libpw token access $keys.refresh_token
+
     if $update_bookmarks {
         libpw update-bookmarks $keys.user_id $access_token
         if $verbose {
@@ -51,12 +51,15 @@ def main [
         $wallpaper | if ($in | get fetched) { printGreen "wallpaper was fetched !" } else { printGreen "wallpaper was in cache !" }
     }
 
+    if $show {
+        ^viu $wallpaper.path
+    }
     if $print {
         print $wallpaper.path
         exit
     }
 
-    $wallpaper | get path | do { matugen image $in; swww img --transition-type wave $in }
+    $wallpaper.path | do { ^matugen image $in; ^swww img --transition-type wave $in }
     if $verbose {
         printGreen "wallpaper applied !"
     }

@@ -1,0 +1,21 @@
+#!/usr/bin/env nu
+
+use libpw
+
+let auth = libpw token auth
+job spawn { start $auth.url }
+let code = input --reedline $"
+($auth.url)
+
+1) Open your browser's Developer Tools \(F12\) and switch to the Network tab
+2) Login
+3) Select the last network monitor entry ('callback?state=...')
+4) Copy its 'code' query parameter, paste it below, and press Enter
+
+- This 'code' will expire 30 seconds after logging in.
+- Make sure you copy just the characters between \"code=\" and the next \"&\"
+
+code: "
+let response = libpw token refresh $code $auth.verifier
+
+$response | to json

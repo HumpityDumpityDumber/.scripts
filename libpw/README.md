@@ -8,22 +8,36 @@ For an example script go to [pixiv-wallpaper](../pixiv-wallpaper) which will wor
 ## Getting started
 To get started using libpw you will need your Pixiv user id and refresh token. 
 
-Getting your user id is easy; just go to your profile page and look at the URL: `https://www.Pixiv.net/en/users/109696718` these numbers are your user id.
+To get both of these we can use two functions in libpw. First use `libpw token auth` to get the url to visit.  
 
-Next we have to get your refresh token which is slightly more annoying. I recommend using [gppt](https://github.com/eggplants/get-Pixivpy-token) which will spit out a refresh token and an access token. We only need the refresh token because libpw grabs access tokens when needed.
+1) Open your browser's Developer Tools \(F12\) and switch to the Network tab
 
+2) Login
 
+3) Select the last network monitor entry ('callback?state=...')
 
-We need the refresh token in order to run the `get-access-token` subcommand and the user id to run the `update-bookmarks` subcommand.
+4) Grab its 'code' query parameter
+
+    - This 'code' will expire 30 seconds after logging in.
+    - Make sure you copy just the characters between \"code=\" and the next \"&\"
+
+and then use `libpw token refresh` with the code you get and it will spit out json that looks like this:
+
+```json
+{
+    "user_id": int,
+    "refresh_token": "string"
+}
+```
+
+We need the refresh token in order to run the `token access` subcommand and the user id to run the `update-bookmarks` subcommand.
 
 Before running any other commands you should run the `init` subcommand. Running `init` before any other commands is recommended in your scripts. `init` will by default create a cache directory named `.pw-cache/` in the module folder. This can be changed by reassigning `$env.PW_CACHEDIR` after importing the module.
-
-
 
 ## Usage
 
 ```nushell
-libpw get-access-token <refresh_token>
+libpw token access <refresh_token>
 
 
 libpw update-bookmarks <user_id> <access_token>
@@ -36,7 +50,7 @@ libpw get-wallpaper <wallpaper_url> <access_token>
 
 ```
 
-`get-access-token` is run with your refresh token and returns your access token. Your access token is fetched from Pixiv only if the one in the cache has expired or does not exist.
+`token access` is run with your refresh token and returns your access token. Your access token is fetched from Pixiv only if the one in the cache has expired or does not exist.
 
 Once you have your access token you should run `update-bookmarks`. This will create a JSON file in the cache with all of your bookmarks tagged with #wallpaper. If you want to change the tag that is used you can simply change the parameter in the URL that is fetched.
 

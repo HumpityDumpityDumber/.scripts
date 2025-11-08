@@ -48,8 +48,20 @@ export def "init" [] {
     }
 }
 
+export def "token auth" [] {
+    let verifier = (random chars --length 48)
+    let challenge = ($verifier | hash sha256 --binary | encode base64 --url --nopad)
+    let url = $"https://app-api.pixiv.net/web/v1/login?code_challenge=($challenge)&code_challenge_method=S256&client=pixiv-android"
+    { verifier: $verifier url: $url }
+}
+
+export def "token refresh" [code: string, verifier: string] {
+    let response = http post "https://oauth.secure.pixiv.net/auth/token" $"grant_type=authorization_code&code=($code)&client_id=MOBrBDS8blbauoSck0ZfDbtuzpyT&client_secret=lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj&code_verifier=($verifier)&redirect_uri=https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback" --headers { "Content-Type": "application/x-www-form-urlencoded" }
+    { user_id: ($response.user.id | into int), refresh_token: $response.refresh_token }
+}
+
 # update cached access token if needed and then fetch it from cache
-export def "get-access-token" [refresh_token: string] {
+export def "token access" [refresh_token: string] {
     let token_file = ($env.PW_CACHEDIR)/access_token.json
 
     if (try { (date now | into int) - (open $token_file | get time) > 3600000000000 } catch { true }) {
