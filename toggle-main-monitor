@@ -1,26 +1,19 @@
 #!/usr/bin/env nu
 
-def notify [message: string] {
-  notify-send "Monitor Toggle" $message
+let state_file = $"($nu.home-dir)/.cache/monitor-input"
+
+if not ($state_file | path exists) {
+    "dp" | save $state_file
 }
 
-# Get current_mode for DP-1
-let current_mode = (niri msg --json outputs | from json | get DP-1.current_mode)
+let current = (
+    open $state_file
+)
 
-match $current_mode {
-  null => {
-    print "Turning on DP-1 monitor..."
-    niri msg action close-overview
-    niri msg output DP-1 on
-    ddcutil --bus=6 setvcp 0x60 0x09
-    swww query | lines | parse ": {display}: {res}, scale: {scale}, currently displaying: image: {path}" | where display == HDMI-A-1 | get path.0 | swww img --transition-type none $in
-    xrandr --output DP-1 --primary
-    }
-  _ => {
-    print "Turning off DP-1 monitor..."
-    niri msg output DP-1 off
-    ddcutil --bus=6 setvcp 0x60 0x06
-    sleep 3sec
-    notify "DP-1 monitor disabled"
-  }
+if $current == "dp" {
+    ddcutil setvcp 0x60 0x06
+    "hdmi" | save -f $state_file
+} else {
+    ddcutil setvcp 0x60 0x09
+    "dp" | save -f $state_file
 }

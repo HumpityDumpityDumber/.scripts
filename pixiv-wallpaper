@@ -59,7 +59,7 @@ def main [
         exit
     }
 
-    $wallpaper.path | do { ^matugen image $in; ^swww img --transition-type wave $in }
+    ^matugen image $wallpaper.path
     if $verbose {
         printGreen "wallpaper applied !"
     }

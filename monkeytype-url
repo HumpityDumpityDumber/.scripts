@@ -1,7 +1,0 @@
-#!/usr/bin/env nu
-
-open -r ~/.cache/monkeytype.json |
-  encode base64 |
-  $"https://monkeytype.com/?customTheme=($in)" |
-  bgrun start $in
-  
