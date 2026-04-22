@@ -1,3 +1,14 @@
 #!/usr/bin/env nu
 
-mpv /dev/video0 --fs --osc=no --wayland-app-id="cc-stream" --wayland-content-type=game --profile=low-latency
+(mpv /dev/video0
+    --demuxer-lavf-format=video4linux2
+    --demuxer-lavf-o=video_size=1920x1080,pixel_format=nv12
+    --vf=scale=2560:1440
+    --no-keepaspect
+    --fs
+    --osc=no
+    --wayland-app-id="cc-stream"
+    --wayland-content-type=game
+    --profile=low-latency
+    --untimed
+)

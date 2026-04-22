@@ -1,0 +1,21 @@
+#!/usr/bin/env nu
+
+const CONFIG_FILE = "~/.config/cwal/cwalmv.toml" | path expand
+
+def main [] {
+  let config = open $CONFIG_FILE
+
+  cd ("~/.cache/cwal" | path expand)
+  
+  if ($config.wallpaper?.set? | default false) {
+    run-external $config.wallpaper.command ...$config.wallpaper.arguments?
+  }
+
+  $config.templates? | items {|name, template|
+    let input_path = try { $template.input_path | path expand -s } catch { print -e $"($name): input path error"; exit 1}
+    let output_path = try { $template.output_path | path expand } catch { print -e $"($name): output path error"; exit 1 }
+    if not ($output_path | path dirname | path exists) { mkdir ($output_path | path dirname) }
+    cp -v $input_path $output_path
+    if ("post_hook" in $template) { bash -c ($template.post_hook) }
+  } | ignore
+}

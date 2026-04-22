@@ -1,17 +1,15 @@
 #!/usr/bin/env nu
 
-let hex_color = niri msg --json pick-color |
+let hex = niri msg --json pick-color |
 from json |
 get rgb |
-each { |float_ch|
-  $float_ch * 255 |
-  math round
-  } |
-  each { |int_ch|
-    $int_ch |
+par-each { |c|
+    $c * 255 |
+    math round |
     into binary -c |
-    encode hex } |
-  $"#($in.0)($in.1)($in.2)"
+    encode hex
+} |
+$"#($in.0)($in.1)($in.2)"
 
-wl-copy $hex_color
-notify-send --transient --app-name=niri-picker $hex_color
+wl-copy $hex
+notify-send --transient --app-name=niri-picker $hex

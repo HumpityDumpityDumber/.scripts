@@ -1,0 +1,16 @@
+#!/usr/bin/env nu
+let nodes = (pw-dump | from json)
+
+# find metadata node with default audio sink
+let default = $nodes | where type == "PipeWire:Interface:Metadata" | where props."metadata.name" == default | get metadata.0 | where key == "default.audio.sink" | get value.name.0
+
+# find all sinks
+let sinks = $nodes | where type == "PipeWire:Interface:Node" | where info.props."media.class"? == "Audio/Sink" | each {|s| {id: $s.id name: $s.info.props."node.name"}}
+
+# index of current sink
+let idx = (($sinks | enumerate | where item.name == $default | get index | first))
+
+# get the next or first item
+let next = $sinks | get (($idx + 1) mod ($sinks | length)) | get id
+
+wpctl set-default $next

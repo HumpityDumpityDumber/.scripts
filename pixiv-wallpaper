@@ -22,7 +22,7 @@ def main [
     --no-apply (-n) # don't apply wallpaper after updating bookmarks
     --verbose (-v) # print verbose output
     --print (-p) # print url instead of applying wallpaper
-    --show (-s) # print chosen image to terminal with viu
+    --show (-s) # print chosen image to terminal with chafa
 ] {
     let keys = (open ($env.home)/.config/pixiv-wallpaper/pw-keys.json)
     let access_token = libpw token access $keys.refresh_token
@@ -52,7 +52,7 @@ def main [
     }
 
     if $show {
-        ^viu $wallpaper.path
+        ^chafa $wallpaper.path
     }
     if $print {
         print $wallpaper.path
