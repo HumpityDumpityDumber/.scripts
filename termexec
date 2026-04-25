@@ -1,0 +1,7 @@
+#!/usr/bin/env nu
+
+const term = "ghostty"
+
+def --wrapped main [...proc: string] {
+  ^$term -e ...$proc
+}

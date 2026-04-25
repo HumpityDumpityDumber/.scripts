@@ -3,7 +3,7 @@
 let hex = niri msg --json pick-color |
 from json |
 get rgb |
-par-each { |c|
+each { |c|
     $c * 255 |
     math round |
     into binary -c |
