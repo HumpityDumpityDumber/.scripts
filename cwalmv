@@ -2,13 +2,14 @@
 
 const CONFIG_FILE = "~/.config/cwal/cwalmv.toml" | path expand
 
-def main [] {
+def main [wallpaper: path] {
   let config = open $CONFIG_FILE
 
   cd ("~/.cache/cwal" | path expand)
   
-  if ($config.wallpaper?.set? | default false) {
-    run-external $config.wallpaper.command ...$config.wallpaper.arguments?
+  if ($config.config?.wallpaper?.set? | default false) {
+    print "Running wallpaper command"
+    run-external $config.config.wallpaper.command ...$config.config.wallpaper.arguments? ($wallpaper | path expand)
   }
 
   $config.templates? | items {|name, template|

@@ -1,0 +1,27 @@
+#!/usr/bin/env nu
+
+$env.AWWW_TRANSITION = "wave"
+
+def main [wp: path] {
+ 
+  let blurred_path = ($wp | path parse | $"($nu.home-dir)/.cache/wallpapers/($in.stem).($in.extension)")
+
+  if not ($blurred_path | path exists) {
+  let b_id = notify-send "Apply Wallpaper" "Blurring wallpaper..." -p -t 999999
+(ffmpeg -i $wp -vf "
+  scale=iw/2:-1:flags=bicubic, gblur=sigma=2,
+  scale=iw/2:-1:flags=bicubic, gblur=sigma=2,
+  scale=iw/2:-1:flags=bicubic, gblur=sigma=2,
+  scale=iw*2:-1:flags=bicubic, gblur=sigma=2,
+  scale=iw*2:-1:flags=bicubic, gblur=sigma=2,
+  scale=iw*2:-1:flags=bicubic, gblur=sigma=2,
+  noise=alls=3:allf=t+u"
+-q:v 2 -update 1 $blurred_path)
+    notify-send -r $b_id "Apply Wallpaper" "Finished blurring wallpaper. Applying..." -t 2000 -e
+  } else { 
+    notify-send "Apply Wallpaper" "Blurred wallpaper in cache.  Applying..." -t 2000 -e
+  }
+  awww img $blurred_path -n ":overview"
+  awww img -n ":workspace" $wp
+  
+}

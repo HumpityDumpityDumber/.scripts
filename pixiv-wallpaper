@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 const file_dir = (path self | path dirname)
+const conf_dir = $"($nu.home-dir)/.config/pixiv-wallpaper"
 
 use libpw
 
@@ -8,21 +9,22 @@ $env.PW_CACHEDIR = ($env.home)/.cache/pixiv-wallpaper
 
 libpw init
 
-$env.PW_INCLUDE_URLS = if (($file_dir)/pw_include_urls.txt | path exists) { (open ($file_dir)/pw_include_urls.txt | lines) } else { null }
+$env.PW_INCLUDE_URLS = if (($conf_dir)/pw_include_urls.txt | path exists) { (open ($conf_dir)/pw_include_urls.txt | lines) } else { null }
 
-$env.PW_BLACKLIST_IMAGES = if (($file_dir)/pw_blacklist.txt | path exists) { (open ($file_dir)/pw_blacklist.txt | lines) } else { null }
-
-def printGreen [text] {
-    print -e $"(ansi green_bold)($text)(ansi reset)"
-}
+$env.PW_BLACKLIST_IMAGES = if (($conf_dir)/pw_blacklist.txt | path exists) { (open ($conf_dir)/pw_blacklist.txt | lines) } else { null }
 
 # fetch bookmarked images tagged with #wallpaper from pixiv using libpw
 def main [
     --update-bookmarks (-u) # update the bookmarks cache
     --no-apply (-n) # don't apply wallpaper after updating bookmarks
     --verbose (-v) # print verbose output
-    --print (-p) # print url instead of applying wallpaper
+    --print (-p) # print path instead of applying wallpaper
+    --print-url (-l) # print url
     --show (-s) # print chosen image to terminal with chafa
+    --next (-x): string # next wallpaper instead of random selection
+    --all (-a) # just print all bookmarks
+    --choose (-c): string # choose wallpaper directly
+    --notify (-y) # send notification
 ] {
     let keys = (open ($env.home)/.config/pixiv-wallpaper/pw-keys.json)
     let access_token = libpw token access $keys.refresh_token
@@ -30,25 +32,46 @@ def main [
     if $update_bookmarks {
         libpw update-bookmarks $keys.user_id $access_token
         if $verbose {
-            printGreen "bookmarks updated !"
+            print -e "bookmarks updated !"
         }
+    }
+
+    let n_id = if $notify { notify-send "Pixiv Wallpaper" "Picking random wallpaper..." -p -t 999999 }
+    
+    if $all {
+        print (libpw list-urls)
+        exit
     }
 
     if $no_apply {
         if $verbose {
-            printGreen "exiting early..."
+            print -e "exiting early..."
         }
         exit
     }
 
-    let url = libpw pick-wallpaper
-    if $verbose {
-        printGreen $"wallpaper selected: ($url)"
+    let url = if $next != null { 
+        let urls = libpw list-urls
+        $urls | get (($urls | enumerate | where item == $next | get index).0 + 1)
+    } else {
+        if $choose != null {
+            $choose
+        } else {
+            libpw pick-wallpaper 
+        }
+    }
+
+    if $verbose {    
+        print -e $"wallpaper selected: ($url)"
     }
 
     let wallpaper = libpw get-wallpaper $url $access_token
     if $verbose {
-        $wallpaper | if ($in | get fetched) { printGreen "wallpaper was fetched !" } else { printGreen "wallpaper was in cache !" }
+        $wallpaper | if ($in | get fetched) { print -e "wallpaper was fetched !" } else { print -e "wallpaper was in cache !" }
+    }
+    
+    if $notify {
+        notify-send -r $n_id "Pixiv Wallpaper" "Got wallpaper!" -t 2000 -e 
     }
 
     if $show {
@@ -58,9 +81,12 @@ def main [
         print $wallpaper.path
         exit
     }
+    if $print_url {
+        print $wallpaper.url
+    }
 
-    ^matugen image $wallpaper.path
+    ^matugen image --quiet --source-color-index 0 $wallpaper.path out+err>| ignore
     if $verbose {
-        printGreen "wallpaper applied !"
+        print -e "wallpaper applied !"
     }
 }

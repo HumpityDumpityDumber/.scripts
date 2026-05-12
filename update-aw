@@ -1,0 +1,11 @@
+#!/usr/bin/env nu
+
+let dir = "~/Pictures/additional-wallpapers/"
+let $out = "~/.config/pixiv-wallpaper/pw_include_urls.txt"
+
+$dir |
+path expand |
+path join "**/*.{png, jpeg, jpg, gif}" |
+glob $in | each { $"file://($in)"} |
+to text |
+save -f ($out | path expand)

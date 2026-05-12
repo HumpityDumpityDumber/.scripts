@@ -1,0 +1,8 @@
+#!/usr/bin/env nu
+
+let path = awww query --namespace ":workspace" | rg -P "(?<=image: ).*" -o --color never
+
+trash $path
+notify-send "Remove Additional Wallpaper" "Moved current wallpaper to trash!" -e -t 2000
+update-aw
+pixiv-wallpaper -yv err>| save -a ~/.cache/pixiv-wallpaper/log.txt
